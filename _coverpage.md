@@ -3,7 +3,7 @@
 </p>
 <h1 align="center"><strong>CODING NOW......</strong></h1>
 
-[GitHub](https://github.com/Snailclimb/docsify-demo)
+[GitHub](https://github.com/jorgen-zhao/blog)
 [开始阅读](#blog)
 
 
