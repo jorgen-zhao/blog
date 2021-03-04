@@ -33,8 +33,8 @@
 
 2. 在 Additional command line parameters: 后面填上 -parameters，如下图
 
-   ![img](.\assets\stickpicture.png)
+   ![img](..\assets\stickpicture.png)
 
 3. 填好后，再将项目重新build一下，如下图
 
-   ![img](.\assets\stickpicture-1614839747930.png)
+   ![img](..\assets\stickpicture-1614839747930.png)
