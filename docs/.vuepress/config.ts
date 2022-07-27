@@ -41,8 +41,8 @@ export default defineConfig4CustomTheme<VdoingThemeConfig>({
         text: '工具',
         link: '/ui/',
         items: [
-          { text: 'HTML', link: '/pages/8309a5b876fc95e3/' },
-          { text: 'CSS', link: '/pages/0a83b083bdf257cb/' },
+          { text: 'Docker', link: '/pages/64433f', },
+          { text: 'ELK', link: '/note/git/', },
           { text: 'Git', link: '/note/git/', },
         ],
       },
