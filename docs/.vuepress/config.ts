@@ -26,7 +26,7 @@ export default defineConfig4CustomTheme<VdoingThemeConfig>({
     // 导航配置
     nav: [
       { text: '首页', link: '/' },
-      { text: '🔥实战案例', link: '/note/realDev/' },
+      { text: '🔥实战案例💥', link: '/note/realDev/' },
       // {
       //   text: '开发日志',
       //   link: '/web/', //目录页链接，此处link是vdoing主题新增的配置项，有二级导航时，可以点击一级导航跳到目录页
@@ -47,7 +47,7 @@ export default defineConfig4CustomTheme<VdoingThemeConfig>({
           { text: 'Git', link: '/note/git/', },
         ],
       },
-      {
+      /* {
         text: '技术',
         link: '/technology/',
         items: [
@@ -67,7 +67,7 @@ export default defineConfig4CustomTheme<VdoingThemeConfig>({
           { text: '实用技巧', link: '/pages/baaa02/' },
           // { text: '友情链接', link: '/friends/' },
         ],
-      },
+      }, */
       { text: '关于', link: '/about/' },
       {
         text: '收藏',
