@@ -26,7 +26,7 @@ export default defineConfig4CustomTheme<VdoingThemeConfig>({
     // 导航配置
     nav: [
       { text: '首页', link: '/' },
-      { text: '💥开发日志', link: '/pages/e6ae46/' },
+      { text: '💥开发日志', link: '/pages/0b4afb/' },
       // {
       //   text: '开发日志',
       //   link: '/web/', //目录页链接，此处link是vdoing主题新增的配置项，有二级导航时，可以点击一级导航跳到目录页
@@ -117,7 +117,7 @@ export default defineConfig4CustomTheme<VdoingThemeConfig>({
 
     // 文章默认的作者信息，(可在md文件中单独配置此信息) string | {name: string, link?: string}
     author: {
-      name: ' Jorgen', // 必需
+      name: ' Jorgen is me:)', // 必需
       link: 'https://gitee.com/jorgenme', // 可选的
     },
 
@@ -125,7 +125,7 @@ export default defineConfig4CustomTheme<VdoingThemeConfig>({
     blogger: {
       avatar: '/img/avatar.jpg',
       name: 'Jorgen',
-      slogan: '面壁&破壁',
+      slogan: 'love it, make mistakes, learn, keep grinding.',
     },
 
     // 社交图标 (显示于博主信息栏和页脚栏。内置图标：https://doc.Jorgen.com/pages/a20ce8/#social)
@@ -145,7 +145,7 @@ export default defineConfig4CustomTheme<VdoingThemeConfig>({
         {
           iconClass: 'icon-erji',
           title: '听音乐',
-          link: 'https://music.163.com/#/playlist?id=755597173',
+          link: 'https://music.163.com/#/album?id=158468886',
         },
       ],
     },
