@@ -1,7 +1,7 @@
 ---
 home: true
 # heroImage: /img/web.png
-heroText: 🚩骐骥一跃不能十步，驽马十驾功在不舍🚩
+heroText: 🚩hello world🚩
 # tagline: 🚩骐骥一跃不能十步，驽马十驾功在不舍🚩
 # actionText: 立刻进入 →
 # actionLink: /web/
