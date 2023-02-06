@@ -17,7 +17,7 @@ if [ -z "$GITHUB_TOKEN" ]; then
   githubUrl=git@github.com:jorgen-zhao/blog.git
 else
   msg='来自github actions的自动部署'
-  githubUrl=https://github.com/jorgen-zhao/blog.git
+  githubUrl=https://jorgen-zhao:${GITHUB_TOKEN}@github.com/jorgen-zhao/blog.git
   git config --global user.name "jorgen-zhao"
   git config --global user.email "1129810754@qq.com"
 fi
