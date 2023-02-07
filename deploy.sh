@@ -19,5 +19,6 @@ git add -A
 git commit -m "github action auto deploy"
 git push -f git@github.com:jorgen-zhao/blog.git master:gh-pages
 
+
 cd -
 rm -rf $dist_path
