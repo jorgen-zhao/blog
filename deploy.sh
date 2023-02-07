@@ -5,7 +5,9 @@ set -e
 
 git config --global user.email "1129810754@qq.com"
 git config --global user.name "jorgen-zhao"
-push_addr=`git remote get-url --push origin` # git提交地址
+
+# push_addr=`git remote get-url --push origin` # git提交地址
+push_addr=`git@github.com:jorgen-zhao/blog.git` # git提交地址
 commit_info=`git describe --all --always --long`
 dist_path=docs/.vuepress/dist # 打包生成的文件夹路径
 push_branch=gh-pages # 推送的分支
