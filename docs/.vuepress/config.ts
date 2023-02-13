@@ -46,6 +46,10 @@ export default defineConfig4CustomTheme<VdoingThemeConfig>({
           // { text: 'k8s', link: '/pages/a355b7/', },
           // { text: 'ELK', link: '/pages/5fc1e0/', },
           // { text: 'Git', link: '/note/git/', },
+          { text: 'DDD', link: '/pages/ef5f6a/', },
+          { text: '软件开发指导', link: '/pages/fff194/', },
+          { text: ' CAP & BASE理论', link: '/pages/1ca1c8/', },
+          { text: ' 时间管理', link: '/pages/85770a/', },
         ],
       },
       
