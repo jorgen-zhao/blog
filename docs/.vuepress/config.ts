@@ -42,25 +42,21 @@ export default defineConfig4CustomTheme<VdoingThemeConfig>({
         text: '🧰工具',
         link: '/ui/',
         items: [
-          // { text: 'Docker', link: '/pages/64433f/', },
-          // { text: 'k8s', link: '/pages/a355b7/', },
-          // { text: 'ELK', link: '/pages/5fc1e0/', },
-          // { text: 'Git', link: '/note/git/', },
-          { text: 'DDD', link: '/pages/ef5f6a/', },
-          { text: '软件开发指导', link: '/pages/fff194/', },
-          { text: ' CAP & BASE理论', link: '/pages/1ca1c8/', },
-          { text: ' 时间管理', link: '/pages/85770a/', },
+          { text: '🤔思想', link: '/note/thoughts/', },
+          { text: '🐳Docker', link: '/note/Docker/', },
+          { text: '☸k8s', link: '/note/k8s/', },
+          { text: '系统监控', link: '/note/monitor/', },
+          { text: '关系型数据库', link: '/pages/9d8bb7/', },
+          { text: '消息队列', link: '/pages/6a0451/', },
+          { text: '时序数据库', link: '/pages/0384dd/', },
+          { text: '非关系型数据库', link: '/pages/ec5269/', },
+          
         ],
       },
       
       {
         text: '收藏',
         link: '/pages/beb6c0bd8a66cea6/',
-        // items: [
-        //   { text: '网站', link: '/pages/beb6c0bd8a66cea6/' },
-        //   { text: '资源', link: '/pages/eee83a9211a70f9d/' },
-        //   { text: 'Vue资源', link: '/pages/12df8ace52d493f6/' },
-        // ],
       },
       { text: '关于', link: '/about/' },
       {
