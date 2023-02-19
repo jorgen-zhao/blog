@@ -7,4 +7,4 @@ Writing a blog can also be a great way to market yourself and your services. You
 Blogging can be a great way for programmers to share knowledge, document progress, demonstrate their skills, stay up to date with trends, and market themselves to potential employers or clients. It can also be used to build a portfolio of work, network with other programmers, and promote their skills and services.
 
 ## By the way
-🚀[vdoing](https://github.com/xugaoyi/vuepress-theme-vdoing)。It help me to build this blog. It's very to use, and provide us a very complete makedown grammer. Everyone can use it easily, you can try it now.
+🚀[vdoing](https://github.com/jorgen-zhao/vuepress-theme-vdoing)。It help me to build this blog. It's very to use, and provide us a very complete makedown grammer. Everyone can use it easily, you can try it now.

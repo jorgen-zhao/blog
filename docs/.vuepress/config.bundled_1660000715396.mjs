@@ -71,7 +71,7 @@ var config_default = defineConfig4CustomTheme({
     sidebar: "structuring",
     author: {
       name: " Jorgen",
-      link: "https://gitee.com/jorgenme"
+      link: "https://github.com/jorgen-zhao"
     },
     blogger: {
       avatar: "/img/avatar.jpg",
@@ -88,7 +88,7 @@ var config_default = defineConfig4CustomTheme({
         {
           iconClass: "icon-github",
           title: "GitHub",
-          link: "https://gitee.com/jorgenme"
+          link: "https://github.com/jorgen-zhao"
         },
         {
           iconClass: "icon-erji",
@@ -99,12 +99,12 @@ var config_default = defineConfig4CustomTheme({
     },
     footer: {
       createYear: 2019,
-      copyrightInfo: 'Jorgen | <a href="https://gitee.com/jorgenme/vuepress-theme-vdoing/blob/master/LICENSE" target="_blank">MIT License</a>'
+      copyrightInfo: 'Jorgen | <a href="https://github.com/jorgen-zhao/vuepress-theme-vdoing/blob/master/LICENSE" target="_blank">MIT License</a>'
     },
     extendFrontmatter: {
       author: {
         name: "Jorgen",
-        link: "https://gitee.com/jorgenme"
+        link: "https://github.com/jorgen-zhao"
       }
     },
     htmlModules: htmlModules_default
