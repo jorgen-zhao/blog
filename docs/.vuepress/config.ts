@@ -88,7 +88,8 @@ export default defineConfig4CustomTheme<VdoingThemeConfig>({
 
     // pageStyle: 'line', // 页面风格，可选值：'card'卡片 | 'line' 线（未设置bodyBgImg时才生效）， 默认'card'。 说明：card时背景显示灰色衬托出卡片样式，line时背景显示纯色，并且部分模块带线条边框
 
-    // bodyBgImg: [
+    // bodyBgImg: '/img/bg_new.jpeg',
+    // [
     //   'https://cdn.jsdelivr.net/gh/Jorgen/image_store/blog/20200507175828.jpeg',
     //   'https://cdn.jsdelivr.net/gh/Jorgen/image_store/blog/20200507175845.jpeg',
     //   'https://cdn.jsdelivr.net/gh/Jorgen/image_store/blog/20200507175846.jpeg'
