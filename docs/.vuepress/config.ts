@@ -42,6 +42,7 @@ export default defineConfig4CustomTheme<VdoingThemeConfig>({
         text: '🧰工具',
         link: '/ui/',
         items: [
+          { text: '🤯GeEx', link: '/note/geex/', },
           { text: '🤔思想', link: '/note/thoughts/', },
           { text: '🐳Docker', link: '/note/Docker/', },
           { text: '☸k8s', link: '/note/k8s/', },
