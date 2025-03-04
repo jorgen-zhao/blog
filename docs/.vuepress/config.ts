@@ -13,13 +13,13 @@ export default defineConfig4CustomTheme<VdoingThemeConfig>({
   // theme: resolve(__dirname, '../../vdoing'), // 使用本地主题包
 
   locales: {
-    '/': {
+    '/blog/': {
       lang: 'zh-CN',
       title: "Jorgen's blog",
       description: '技术博客,学习与总结。Java,vue,Springboot,MySQL,Docker,Kafka,ES,Node,git,github等技术文章。',
     }
   },
-  base: '/blog/', // 默认'/'。如果你想将你的网站部署到如 https://foo.github.io/bar/，那么 base 应该被设置成 "/bar/",（否则页面将失去样式等文件）
+  // base: '/blog/', // 默认'/'。如果你想将你的网站部署到如 https://foo.github.io/bar/，那么 base 应该被设置成 "/bar/",（否则页面将失去样式等文件）
 
   // 主题配置
   themeConfig: {
