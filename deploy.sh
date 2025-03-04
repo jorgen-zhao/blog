@@ -5,7 +5,7 @@ npm run build # 生成静态文件
 cd docs/.vuepress/dist # 进入生成的文件夹
 
 # deploy to github
-echo 'jorgen.website' > CNAME
+echo 'jorgen.space' > CNAME
 if [ -z "$ACCESS_TOKEN" ]; then
   msg='deploy'
   githubUrl=git@github.com:jorgen-zhao/blog.git
