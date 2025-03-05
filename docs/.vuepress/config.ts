@@ -127,8 +127,8 @@ export default defineConfig4CustomTheme<VdoingThemeConfig>({
     // 博主信息 (显示在首页侧边栏)
     blogger: {
       avatar: '/img/avatar.jpg',
-      name: 'Jorgen',
-      slogan: 'love it, make mistakes, learn, keep grinding.',
+      name: 'jorgen',
+      slogan: 'Love it, make mistakes, learn, keep grinding.',
     },
 
     // 社交图标 (显示于博主信息栏和页脚栏。内置图标：https://doc.Jorgen.com/pages/a20ce8/#social)
