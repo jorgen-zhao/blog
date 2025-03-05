@@ -16,7 +16,7 @@ export default defineConfig4CustomTheme<VdoingThemeConfig>({
     '/': {
       lang: 'zh-CN',
       title: "Jorgen's blog",
-      description: '技术博客,学习与总结。Java,vue,Springboot,MySQL,Docker,Kafka,ES,Node,git,github等技术文章。',
+      description: '技术博客,学习与总结。Java,vue,Springboot,MySQL,Docker,Kafka,ES,Node,git,github,STM32,ESP32折腾记录',
     }
   },
   // base: '/', // 默认'/'。如果你想将你的网站部署到如 https://foo.github.io/bar/，那么 base 应该被设置成 "/bar/",（否则页面将失去样式等文件）
@@ -80,7 +80,7 @@ export default defineConfig4CustomTheme<VdoingThemeConfig>({
     editLinks: false, // 启用编辑
     editLinkText: '编辑',
 
-    //*** 以下是Vdoing主题相关配置，文档：https://doc.Jorgen.com/pages/a20ce8/ ***//
+    //*** 以下是Vdoing主题相关配置，文档：https://doc.Vdoing.com/pages/a20ce8/ ***//
 
     // category: false, // 是否打开分类功能，默认true
     // tag: false, // 是否打开标签功能，默认true
