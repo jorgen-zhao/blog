@@ -59,7 +59,7 @@ export default defineConfig4CustomTheme<VdoingThemeConfig>({
         text: '收藏',
         link: '/pages/beb6c0bd8a66cea6/',
       },
-      { text: '关于', link: '/about/' },
+      { text: '关于', link: '/pages/60bb51/' },
       {
         text: '索引',
         link: '/archives/',
