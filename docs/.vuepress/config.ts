@@ -26,7 +26,86 @@ export default defineConfig4CustomTheme<VdoingThemeConfig>({
     // 导航配置
     nav: [
       { text: '首页', link: '/' },
-      { text: '💥开发日志', link: '/pages/72ef80/' },
+      { text: '💥开发日志', 
+        link: '/web/',
+        items:[
+          {
+            text: '平台架构', link: '/pages/72ef80/'
+          },
+          {
+            text: '混合式开发记录', link: '/pages/8132ec/'
+          },
+          {
+            text: '推送服务', link: '/pages/d4abb2/'
+          },
+          {
+            text: '数据分析', link: '/pages/8dd040/'
+          },
+          {
+            text: '实时调度', link: '/pages/c2d387/'
+          },
+        ] 
+      },
+      {
+        text: '🧰工具',
+        link: '/tools/', //目录页链接，此处link是vdoing主题新增的配置项，有二级导航时，可以点击一级导航跳到目录页
+        items: [
+          // 说明：以下所有link的值只是在相应md文件头部定义的永久链接（不是什么特殊编码）。另外，注意结尾是有斜杠的
+          {
+            text: '架构思想',
+            items: [
+              // { text: '微服务', link: '/note/microservices/' },
+              { text: '分布式', link: '/note/distributed_system/' },
+            ],
+          },
+          {
+            text: '编程框架工具',
+            items: [
+              { text: '编程语言', link: '/note/programming_languages/' },
+              { text: '框架', link: '/note/framework/' },
+              { text: '开发工具', link: '/note/dev_tools/' },
+            ],
+          },
+          {
+            text: '数据存储与处理',
+            items: [
+              { text: '数据库', link: '/note/database/' },
+              { text: '大数据', link: '/note/big_data/' },
+            ],
+          },
+          {
+            text: '消息、缓存与搜索',
+            items: [
+              { text: '消息队列', link: '/note/message_queue/' },
+              // { text: '缓存', link: '/note/cache/' },
+              { text: '搜索与日志分析', link: '/note/search/' },
+            ],
+          },
+          {
+            text: '前端与跨端开发',
+            items: [
+              { text: '前端技术', link: '/note/frontend/' },
+              { text: 'Android', link: '/note/android/' },
+            ],
+          },
+          {
+            text: '系统与运维',
+            items: [
+              { text: '操作系统', link: '/note/operating_system/' },
+              { text: '容器化与 DevOps', link: '/note/devops/' },
+            ],
+          },
+
+          {
+            text: '物联网与安全',
+            items: [
+              { text: '通信协议', link: '/note/protocol/' },
+              { text: '安全', link: '/note/security/' },
+              { text: '云平台', link: '/note/cloud/' },
+            ],
+          },
+        ],
+      },
       // {
       //   text: '开发日志',
       //   link: '/web/', //目录页链接，此处link是vdoing主题新增的配置项，有二级导航时，可以点击一级导航跳到目录页
@@ -38,28 +117,35 @@ export default defineConfig4CustomTheme<VdoingThemeConfig>({
       //     // { text: 'TypeScript', link: '/pages/51afd6/' },
       //   ]
       // },
-      {
-        text: '🧰工具',
-        link: '/ui/',
-        items: [
-          { text: '🤯GeEx', link: '/note/geex/', },
-          { text: '🤔思想', link: '/note/thoughts/', },
-          { text: '🐳Docker', link: '/note/Docker/', },
-          { text: '☸k8s', link: '/note/k8s/', },
-          { text: '系统监控', link: '/note/monitor/', },
-          { text: '关系型数据库', link: '/pages/9d8bb7/', },
-          { text: '消息队列', link: '/pages/6a0451/', },
-          { text: '时序数据库', link: '/pages/0384dd/', },
-          { text: '非关系型数据库', link: '/pages/ec5269/', },
+      // {
+      //   text: '🧰工具',
+      //   link: '/ui/',
+      //   items: [
+      //     { text: '🤯GeEx', link: '/note/geex/', },
+      //     { text: '🤔思想', link: '/note/thoughts/', },
+      //     { text: '🐳Docker', link: '/note/Docker/', },
+      //     { text: '☸k8s', link: '/note/k8s/', },
+      //     { text: '系统监控', link: '/note/monitor/', },
+      //     { text: '关系型数据库', link: '/pages/9d8bb7/', },
+      //     { text: '消息队列', link: '/pages/6a0451/', },
+      //     { text: '时序数据库', link: '/pages/0384dd/', },
+      //     { text: '非关系型数据库', link: '/pages/ec5269/', },
           
-        ],
-      },
+      //   ],
+      // },
+
       
       {
         text: '收藏',
         link: '/pages/beb6c0bd8a66cea6/',
       },
-      { text: '关于', link: '/pages/60bb51/' },
+      { text: '关于', link: '/pages/60bb51/', 
+        items: [
+          {text: '关于我', link: '/pages/60bb51/'},
+          {text: '终身学习', link: '/pages/11bf28/'},
+          {text: '关于时间的感悟', link: '/pages/70c5b0/'},
+        ]
+      },
       {
         text: '索引',
         link: '/archives/',
