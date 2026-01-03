@@ -26,9 +26,10 @@ export default defineConfig4CustomTheme<VdoingThemeConfig>({
     // 导航配置
     nav: [
       { text: '首页', link: '/' },
-      { text: '💥开发日志', 
+      {
+        text: '💥开发日志',
         link: '/web/',
-        items:[
+        items: [
           {
             text: '平台架构', link: '/pages/72ef80/'
           },
@@ -44,7 +45,7 @@ export default defineConfig4CustomTheme<VdoingThemeConfig>({
           {
             text: '实时调度', link: '/pages/c2d387/'
           },
-        ] 
+        ]
       },
       {
         text: '🧰工具',
@@ -130,20 +131,21 @@ export default defineConfig4CustomTheme<VdoingThemeConfig>({
       //     { text: '消息队列', link: '/pages/6a0451/', },
       //     { text: '时序数据库', link: '/pages/0384dd/', },
       //     { text: '非关系型数据库', link: '/pages/ec5269/', },
-          
+
       //   ],
       // },
 
-      
+
       {
-        text: '收藏',
-        link: '/pages/beb6c0bd8a66cea6/',
+        text: 'newland',
+        link: '/newland/',
       },
-      { text: '关于', link: '/pages/60bb51/', 
+      {
+        text: '关于', link: '/pages/60bb51/',
         items: [
-          {text: '关于我', link: '/pages/60bb51/'},
-          {text: '终身学习', link: '/pages/11bf28/'},
-          {text: '关于时间的感悟', link: '/pages/70c5b0/'},
+          { text: '关于我', link: '/pages/60bb51/' },
+          { text: '终身学习', link: '/pages/11bf28/' },
+          { text: '关于时间的感悟', link: '/pages/70c5b0/' },
         ]
       },
       {
