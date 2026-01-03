@@ -43,7 +43,7 @@ jobs:
 
       - name: Commit and Push
         run: |
-          git add _posts/
+          git add docs/04.newland/
           git commit -m "feat: add AI generated post from issue #${{ github.event.issue.number }}"
           git push origin ${{ env.BRANCH_NAME }}
 
