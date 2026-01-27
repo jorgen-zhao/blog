@@ -2,7 +2,7 @@ name: Auto Blog Generator
 
 on:
   schedule:
-    - cron: '0 * * * *'
+    - cron: '*/5 * * * *'
   workflow_dispatch:
     inputs:
       target_dir:
@@ -13,27 +13,6 @@ on:
 jobs:
   generate-post:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        # list from `docs/android` to `docs/security` all directories here
-        target_dir: [
-          "docs/android",
-          "docs/big-data",
-          "docs/cloud",
-          "docs/code-world",
-          "docs/database",
-          "docs/devops",
-          "docs/distributed-system",
-          "docs/framework",
-          "docs/frontend",
-          "docs/message_queue",
-          "docs/operating_system",
-          "docs/programming_languages",
-          "docs/protocol",
-          "docs/security",
-          "docs/架构思想"
-        ]
     
     steps:
       - name: Checkout code
@@ -47,22 +26,38 @@ jobs:
       - name: Install dependencies
         run: pip install -r scripts/requirements.txt
 
-      - name: Determine Target Directory
-        id: set_dir
-        run: |
-          if [ "${{ inputs.target_dir }}" != "" ]; then
-             echo "DIR=${{ inputs.target_dir }}" >> $GITHUB_ENV
-          else
-             echo "DIR=${{ matrix.target_dir }}" >> $GITHUB_ENV
-          fi
-
       - name: Run Auto Blog Generator
         id: generator
         env:
           ZHIPUAI_API_KEY: ${{ secrets.ZHIPUAI_API_KEY }}
-        run: python scripts/auto_blog_generator.py --dir ${{ env.DIR }}
+        run: |
+          if [ "${{ inputs.target_dir }}" != "" ]; then
+             python scripts/auto_blog_generator.py --dir "${{ inputs.target_dir }}"
+          else
+             python scripts/auto_blog_generator.py
+          fi
+
+      - name: Extract Info
+        id: info
+        run: |
+          # Retrieve filepath from previous step outputs (set in script)
+          # Note: The script writes "filepath=..." to GITHUB_OUTPUT.
+          # We can use ${{ steps.generator.outputs.filepath }}
+          
+          FILEPATH="${{ steps.generator.outputs.filepath }}"
+          if [ -z "$FILEPATH" ]; then
+             echo "No file generated. Skipping commit."
+             echo "SKIP=true" >> $GITHUB_ENV
+             exit 0
+          fi
+          
+          DIR=$(dirname "$FILEPATH")
+          echo "DIR=$DIR" >> $GITHUB_ENV
+          echo "FILEPATH=$FILEPATH" >> $GITHUB_ENV
+          echo "SKIP=false" >> $GITHUB_ENV
 
       - name: Create Branch
+        if: env.SKIP == 'false'
         id: create_branch
         run: |
           git config --global user.name 'github-actions[bot]'
@@ -70,17 +65,18 @@ jobs:
           
           # Unique branch name
           TIMESTAMP=$(date +%Y%m%d%H%M%S)
-          TOPIC=$(basename ${{ env.DIR }})
+          TOPIC=$(basename "${{ env.DIR }}")
           BRANCH_NAME="ai-auto-${TOPIC}-${TIMESTAMP}"
           
           git checkout -b $BRANCH_NAME
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
 
       - name: Commit and Push
+        if: env.SKIP == 'false'
         run: |
           # The generator script outputs the filepath to GITHUB_OUTPUT, 
           # but we can also just add the directory provided.
-          git add ${{ env.DIR }}
+          git add "${{ env.FILEPATH }}"
           
           # Check if there are changes
           if git diff --staged --quiet; then
@@ -93,12 +89,12 @@ jobs:
           fi
 
       - name: Create Pull Request
-        if: env.HAS_CHANGES == 'true'
+        if: env.HAS_CHANGES == 'true' && env.SKIP == 'false'
         env:
           GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         run: |
           gh pr create \
             --title "🤖 Auto-Blog: Update for ${{ env.DIR }}" \
-            --body "Auto-generated content for topic: ${{ env.DIR }}. Please review." \
+            --body "Auto-generated content for: ${{ env.FILEPATH }}. Please review." \
             --base master \
             --head ${{ env.BRANCH_NAME }}
