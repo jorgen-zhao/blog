@@ -1,0 +1,290 @@
+The Comprehensive Taxonomy of Large Language Models: Architectures, Optimization, and Agentic Systems
+1. Introduction: The Generative Paradigm Shift
+The field of Artificial Intelligence has undergone a seismic transformation with the advent of Large Language Models (LLMs), shifting the dominant paradigm from discriminative machine learning—which focuses on classifying existing data—to generative artificial intelligence, which creates novel content based on learned probability distributions.1 This transition has necessitated the development of a vast and complex lexicon, a taxonomy of terms that describes not just the models themselves, but the intricate ecosystem of training methodologies, architectural innovations, inference optimizations, and agentic frameworks that surround them.
+At its core, a Large Language Model is a probabilistic system trained on massive corpora of text data to understand and generate human-like language.1 These models function as next-token predictors, calculating the likelihood of a subsequent word (or token) given a preceding context. However, the simplicity of this objective belies the emergent complexity of the resulting behaviors. As these models scale—measured in billions of parameters and trillions of training tokens—they exhibit capabilities that extend far beyond simple text completion, including reasoning, code synthesis, and multi-step planning.2
+The terminology defining this era is distinct. We no longer speak merely of "accuracy" or "recall" in the traditional sense, but of "hallucinations"—the generation of plausible but factually incorrect assertions—and "grounding," the process of anchoring model outputs to verifiable external data sources.4 The operational landscape involves navigating trade-offs between "latency" (response time) and "throughput" (query volume), and mitigating risks such as "prompt injection," where adversarial actors manipulate model instructions.6
+This report provides an exhaustive technical analysis of the LLM landscape as of 2025. It moves systematically through the lifecycle of an AI system: from the foundational Transformer architecture and tokenization mechanisms to the physics of training dynamics like "grokking," the efficiency of parameter-efficient fine-tuning (PEFT), the intricacies of inference optimization via KV caching, and finally to the frontier of autonomous agentic systems. By synthesizing disparate research snippets into a cohesive narrative, we aim to provide a definitive reference for the terminology and mechanisms driving the current AI revolution.
+2. The Transformer Architecture: The Engine of Modern AI
+The modern era of Natural Language Processing (NLP) is defined by the Transformer architecture. Introduced in 2017, the Transformer represented a radical departure from previous sequential architectures like Recurrent Neural Networks (RNNs) and Long Short-Term Memory (LSTM) networks.8 While RNNs processed data sequentially—making them difficult to parallelize and prone to forgetting long-range dependencies—Transformers rely on a mechanism called "self-attention" to process entire sequences simultaneously.
+2.1 The Attention Mechanism
+The heart of the Transformer is the Attention Mechanism. Fundamentally, attention allows the model to weigh the relevance of different parts of the input sequence when processing a specific element, regardless of their distance from one another in the text.8 This breaks the "locality bias" of previous methods and enables the modeling of complex, long-range relationships, such as resolving a pronoun in the final sentence of a paragraph that refers to a noun in the first.
+2.1.1 Self-Attention Mathematics and Intuition
+In the self-attention mechanism, every input token is transformed into three distinct vector representations: the Query ($Q$), the Key ($K$), and the Value ($V$).9
+The Query represents the current token looking for relevant information.
+The Key represents the "tag" or identifier of other tokens in the sequence.
+The Value contains the actual informational content of the token.
+The attention score is calculated by taking the dot product of the Query vector of the current token with the Key vectors of all other tokens. A high dot product indicates high similarity or relevance. These scores are then scaled and normalized using a Softmax function to produce a probability distribution, which is finally used to weight the Value vectors.9 This process creates a new representation for the token that is a weighted sum of all other tokens in the context, effectively "attending" to the most relevant information.
+2.1.2 Multi-Head Attention
+A single attention mechanism might focus on one type of relationship, such as syntactic agreement (e.g., linking a subject to its verb). To capture the multifaceted nature of language, Transformers employ Multi-Head Attention. This involves running multiple self-attention mechanisms in parallel, each with its own set of learnable weight matrices.11
+One "head" might learn to attend to semantic synonyms, while another focuses on positional relationships. The outputs of these parallel heads are concatenated and passed through a linear transformation, allowing the model to aggregate information from different representation subspaces.12 This parallel processing capability is a primary driver of the Transformer's computational efficiency on GPUs compared to sequential RNNs.
+2.1.3 Masked Attention and Autoregression
+In Generative AI, particularly decoder-only models like the GPT series, the architecture must adhere to the causal property of time. When predicting the next word, the model cannot "see" into the future. This is enforced via Masked Attention.11
+During the calculation of attention scores, a mask is applied to the matrix (setting values to negative infinity) to prevent positions from attending to subsequent positions. This ensures the model is "autoregressive"—it generates one token at a time, feeding the output back into the input for the next step, relying solely on the past context.11
+2.2 Tokenization: The Atomic Units of Language
+Before a neural network can process text, the raw string must be converted into numerical representations. This process is called Tokenization. A "token" is the fundamental unit of text for an LLM; it can be a word, a character, or a subword.15 The choice of tokenization strategy has profound implications for a model's efficiency, vocabulary size, and multilingual capabilities.
+2.2.1 Byte-Pair Encoding (BPE)
+Byte-Pair Encoding (BPE) is a subword tokenization algorithm widely used in models like GPT-3 and GPT-4. It begins with a vocabulary of individual characters and iteratively merges the most frequent adjacent pairs of symbols to form new tokens.17 This process continues until a predefined vocabulary size is reached. BPE strikes a balance between character-level (which is too granular and results in long sequences) and word-level (which suffers from a massive vocabulary and "unknown" words) tokenization. It efficiently handles common words as single tokens while breaking down rare or compound words into meaningful sub-units.18
+2.2.2 WordPiece
+Similar to BPE, WordPiece is used in models like BERT. The key difference lies in the selection criterion for merging. While BPE merges based on frequency, WordPiece chooses merges that maximize the likelihood of the training data under a language model.17 This tends to produce a vocabulary that is slightly more semantically coherent, though the performance difference in large generative models is often marginal.
+2.2.3 SentencePiece and Multilingual Challenges
+A significant limitation of BPE and WordPiece is their reliance on pre-tokenization, often splitting text by whitespace to determine initial word boundaries. This approach fails for languages like Chinese, Japanese, and Thai (CJK), which do not use whitespace to separate words.18
+SentencePiece addresses this by treating the input text as a raw stream of Unicode characters (or bytes), ignoring space and punctuation boundaries initially. It learns a subword vocabulary directly from the raw stream, making it truly language-independent.17 SentencePiece often treats whitespace as a distinct character (e.g., the underscore _), allowing the model to losslessly reconstruct the original text. This robustness makes SentencePiece the default choice for modern, multilingual open-weights models like LLaMA and T5.19
+2.3 Embeddings and Positional Encoding
+Once tokenized, discrete tokens are mapped to continuous vector representations called Embeddings. These embeddings capture semantic meaning; in the vector space, the mathematical difference between "King" and "Man" is approximately equal to the difference between "Queen" and "Woman".16
+However, the self-attention mechanism is inherently permutation-invariant; it treats the input as a "bag of words" and has no inherent concept of order. To remedy this, Positional Encodings are injected into the embeddings to provide information about the sequence order.11
+2.3.1 Absolute vs. Relative Positioning
+Early Transformers used Absolute Positional Embeddings (APE), adding a fixed vector to each position index (0, 1, 2...). While effective, APE struggles to generalize to sequence lengths longer than those seen during training.22
+Modern LLMs favor relative positioning schemes, which encode the distance between tokens rather than their absolute position. This allows for better "length extrapolation"—the ability to function on longer texts than trained on.
+2.3.2 RoPE (Rotary Positional Embeddings)
+RoPE has become the industry standard (used in LLaMA, PaLM). It encodes position by rotating the query and key vectors in the embedding space by an angle proportional to their position.22 The dot product (attention score) between two rotated vectors then depends only on the difference in their angles (relative distance), not their absolute orientation. This mathematical property allows RoPE to capture relative positional information naturally and generalize better to longer sequences.24
+2.3.3 ALiBi (Attention with Linear Biases)
+ALiBi takes a different approach by dispensing with embedding-based positional encodings entirely. Instead, it adds a static, non-learned bias to the attention scores that penalizes attention linearly based on the distance between tokens.24 ALiBi has demonstrated superior extrapolation capabilities, allowing models trained on short sequences to process much longer contexts at inference time without the "perplexity explosion" often seen with other methods.23
+3. Training Dynamics: From Initialization to Grokking
+The creation of an LLM involves massive computational resources and distinct phases of learning. Understanding these phases requires analyzing the interplay between data, compute, and model size.
+3.1 Pre-training and Scaling Laws
+Pre-training is the first and most computationally expensive phase. The model is initialized with random weights and trained on trillions of tokens of text using a self-supervised objective: Next-Token Prediction.26 By minimizing the error in predicting the next word, the model implicitly learns syntax, semantics, and world knowledge.
+The performance of models during pre-training is governed by Scaling Laws, which describe the relationship between compute, dataset size, and parameter count.
+3.1.1 Kaplan vs. Chinchilla Scaling Laws
+In 2020, Kaplan et al. proposed scaling laws suggesting that model performance depends primarily on parameter count, leading to a "bigger is better" race (e.g., GPT-3 with 175B parameters).27 However, in 2022, the Chinchilla research by DeepMind revisited these assumptions.
+Chinchilla demonstrated that most large models were significantly "undertrained." They found that for a fixed compute budget, the optimal allocation is not to maximize model size, but to balance model size and training data equally.27
+The Chinchilla Ratio: The optimal training regime requires approximately 20 tokens of data for every model parameter.
+This insight shifted the industry toward "smaller" but data-rich models (e.g., Llama-7B trained on 1 trillion tokens), which are far more efficient to serve while achieving comparable performance to larger, undertrained models.29
+3.2 The Physics of Learning: Grokking
+A fascinating phenomenon observed in training dynamics is Grokking. This describes a situation where a model, after achieving 100% accuracy on its training data (overfitting), appears to stagnate. However, if training continues for a significantly longer period, validation accuracy (performance on unseen data) suddenly spikes, jumping from near-zero to near-perfect.31
+3.2.1 Mechanism: Softmax Collapse and Phase Transitions
+Recent research suggests Grokking occurs due to numerical instability and "softmax collapse" early in training. The model initially learns a "naive" solution—essentially memorizing the training data by scaling up weights, which drives logits to extremes and gradients to zero (stagnation).31
+During the long plateau, Weight Decay (a regularization technique) slowly prunes these large, naive weights. This gradually forces the model to abandon the memorization strategy and discover a more efficient, structured algorithm (a generalizable circuit) that solves the task.32 This phase transition from memorization to generalization challenges the traditional practice of "early stopping," suggesting that extended training can unlock capabilities hidden behind initial overfitting.34
+3.3 Post-Training: Alignment and Instruction Tuning
+A pre-trained model is a raw engine of probability; it may generate toxic content, ramble, or fail to answer questions directly. Post-training aligns this raw capability with human intent.26
+3.3.1 Supervised Fine-Tuning (SFT)
+SFT involves training the model on a curated dataset of high-quality "instruction-response" pairs. This teaches the model the format of interaction—how to be a helpful assistant, how to structure code, or how to summarize text.35
+3.3.2 Reinforcement Learning from Human Feedback (RLHF)
+For more complex alignment (e.g., "be safe," "be nuanced"), simple SFT is insufficient. RLHF introduces a feedback loop 37:
+Reward Model (RM): A separate model is trained to predict human preferences (e.g., which of two answers is better).
+PPO (Proximal Policy Optimization): The LLM is treated as a policy in a reinforcement learning environment. It generates text, receives a score from the Reward Model, and updates its weights to maximize this score.37
+RLHF is powerful but unstable. It suffers from high computational cost (maintaining multiple models in memory) and sensitivity to hyperparameters.38
+3.3.3 Direct Preference Optimization (DPO)
+DPO represents a major advancement in alignment efficiency. Unlike RLHF, which requires a separate reward model and complex PPO loops, DPO optimizes the model directly on preference data using a closed-form loss function.39
+Mechanism: DPO mathematically implicitly solves the constrained reward maximization problem. It increases the likelihood of preferred responses and decreases the likelihood of rejected ones directly.
+Trade-offs: DPO is far more stable and computationally efficient (no extra reward model). However, RLHF may still hold an edge in safety-critical domains where fine-grained reward shaping is necessary to prevent "jailbreaks" or enforce strict boundaries.38
+4. Optimization: Adaptation, Compression, and Inference
+As models grow in size, the cost of deploying them becomes a critical bottleneck. A suite of optimization techniques has emerged to make LLMs faster, smaller, and cheaper to run.
+4.1 Parameter-Efficient Fine-Tuning (PEFT)
+Full fine-tuning (updating all parameters) of a 70B model is prohibitively expensive. PEFT methods update only a tiny fraction of weights.41
+4.1.1 LoRA (Low-Rank Adaptation)
+LoRA freezes the pre-trained model weights ($W$) and injects trainable rank-decomposition matrices ($A$ and $B$) into each layer. The new weight is effectively $W + \Delta W = W + BA$.42 Because $A$ and $B$ are low-rank (small dimensions), the number of trainable parameters drops by up to 10,000x. This allows fine-tuning massive models on consumer hardware without significant performance loss.43
+4.1.2 QLoRA (Quantized LoRA)
+QLoRA pushes efficiency further by quantizing the frozen base model ($W$) to 4-bit precision while keeping the LoRA adapters in 16-bit.42
+NF4 (Normal Float 4): QLoRA introduces a novel data type, NF4, which is information-theoretically optimal for normally distributed weights (typical in neural networks). This allows a 65B parameter model to be fine-tuned on a single 48GB GPU, a feat previously impossible.44
+4.2 Quantization: INT8, FP4, and Precision
+Quantization reduces the precision of model weights from standard 16-bit floating point (FP16/BF16) to lower-bit representations like 8-bit integers (INT8) or 4-bit floats (FP4).45
+Memory Bandwidth: The primary bottleneck in LLM inference is not computation speed but memory bandwidth—how fast data moves from VRAM to the compute cores. By reducing weight size (e.g., 4-bit vs 16-bit), we reduce data movement by 4x, resulting in significant speedups.46
+Accuracy Trade-off: Aggressive quantization (like 4-bit) can degrade model "intelligence." However, techniques like Double Quantization (quantizing the quantization constants themselves) help mitigate this loss.44
+4.3 Inference Physics: The KV Cache
+Inference in LLMs is autoregressive: generating the 100th token requires attending to the previous 99. Naively re-computing the Key ($K$) and Value ($V$) vectors for the entire history at every step would be exponentially expensive ($O(N^2)$).
+4.3.1 The KV Cache Mechanism
+To solve this, the KV Cache stores the calculated $K$ and $V$ vectors for all previous tokens in GPU memory. At each step, only the $K$ and $V$ for the new token are computed and appended to the cache.47
+While this makes computation linear ($O(N)$), it introduces a massive memory cost. For long sequences (e.g., 128k context), the KV Cache can grow larger than the model weights themselves, consuming terabytes of VRAM across a batch of users.49
+4.3.2 PagedAttention and Memory Management
+Memory fragmentation is a major issue with KV Caches; reserving contiguous blocks of memory for unknown generation lengths is wasteful. PagedAttention (inspired by operating system virtual memory paging) breaks the KV Cache into non-contiguous blocks. This allows the system to allocate memory dynamically as needed, significantly increasing memory efficiency and allowing for higher batch sizes (throughput).47
+4.4 Model Compression: Pruning and Distillation
+Beyond quantization, we can structurally reduce model size.
+Pruning: Involves removing "unimportant" connections. Structured Pruning removes entire components (neurons, attention heads, or layers), creating a physically smaller dense model.51
+Distillation: A process where a large "Teacher" model trains a smaller "Student" model. The student learns to mimic not just the teacher's final output, but its internal probability distributions (logits). This transfers the teacher's reasoning capabilities into a more efficient architecture.53
+Combining these (e.g., pruning a model then distilling it to recover lost accuracy) is a state-of-the-art method for creating high-performance Small Language Models (SLMs).54
+5. Retrieval-Augmented Generation (RAG): Solving the Context Problem
+LLMs have a fundamental limitation: their knowledge is static, frozen at the moment of training cut-off. Retrieval-Augmented Generation (RAG) bridges this gap by allowing the model to query external databases dynamically.56
+5.1 The RAG Architecture
+RAG separates knowledge (stored in a database) from reasoning (the LLM). The pipeline consists of:
+Ingestion & Chunking: Documents are split into smaller segments.
+Indexing: Chunks are converted to embeddings and stored in a Vector Database (e.g., Milvus, Pinecone).58
+Retrieval: A user query is embedded, and a "Nearest Neighbor" search finds relevant chunks based on semantic similarity.
+Generation: The retrieved chunks are injected into the LLM's context window as "grounding" data to answer the query.59
+5.2 Advanced Chunking Strategies
+The quality of RAG depends heavily on how documents are split.
+Fixed-Size Chunking: Splits text by character count. Fast but can break sentences or context mid-thought.60
+Sliding Window Chunking: Creates overlapping chunks (e.g., 500 words with 100 words overlap) to ensure context is preserved across boundaries.61
+Semantic Chunking: Uses embeddings to detect topic shifts in the text, splitting only when the semantic meaning changes. This ensures each chunk represents a coherent idea.60
+Recursive Chunking: Splits hierarchically (e.g., by section, then paragraph, then sentence) to maintain document structure.60
+5.3 Retrieval Optimization: Re-Ranking and Hybrid Search
+Naive vector search often retrieves irrelevant chunks that share keywords but not intent.
+Re-Ranking: A two-stage process. First, retrieve a broad set of candidates (e.g., 50) using fast vector search. Then, use a Cross-Encoder (a more accurate but slower model) to score the relevance of each chunk to the query. Only the top-ranked chunks (e.g., top 5) are passed to the LLM. This drastically reduces hallucinations.62
+Hybrid Search: Combines dense vector search (semantic) with sparse keyword search (BM25). This is crucial for queries involving specific identifiers (e.g., part numbers, acronyms) that vector models might miss.58
+6. Agentic Systems: From Chatbots to Autonomous Actors
+While a chatbot answers questions, an Agent pursues goals. Agentic AI refers to systems where the LLM functions as a reasoning engine to plan, execute actions, and perceive results in a loop.63
+6.1 Reasoning Patterns
+To act autonomously, models need structured thinking processes.
+Chain of Thought (CoT): Prompting the model to "think step-by-step." This forces the model to generate intermediate reasoning tokens, which effectively acts as "test-time compute," significantly improving performance on math and logic.56
+Tree of Thoughts (ToT): Generalizes CoT. The model generates multiple possible next steps (branches), evaluates each, and explores the most promising paths using search algorithms like Breadth-First Search (BFS). This is essential for strategic planning where backtracking might be necessary.66
+ReAct (Reason + Act): A loop where the agent iterates through three states: Thought (analyzing the current state), Action (calling a tool/API), and Observation (reading the tool's output). This allows the agent to interact with the world dynamically.69
+Plan-and-Solve: A pattern where the agent first generates a complete plan and then executes it, as opposed to ReAct's step-by-step improvisation. This is often more efficient for well-defined tasks.69
+6.2 Memory Architectures
+Agents require persistence to maintain continuity across tasks.
+Short-Term Memory (STM): The immediate context window. It handles the active conversation but is volatile and limited in size.71
+Long-Term Memory (LTM): External storage (Vector DBs) where the agent saves facts, user preferences, and past experiences. This allows for "infinite" memory recall via retrieval, enabling personalization and learning over time.71
+Episodic vs. Semantic Memory: Advanced agents distinguish between remembering specific events (Episodic) and generalized knowledge (Semantic) to optimize retrieval efficiency.73
+6.3 Multi-Agent Frameworks
+Complex workflows are often best handled by teams of specialized agents rather than a single monolith.
+CrewAI: A role-based framework. Developers define "agents" with specific roles (e.g., "Researcher," "Writer") and "tasks." The framework orchestrates their collaboration, similar to a human team structure.74
+AutoGen (Microsoft): A conversational framework. Agents (which can be LLMs, humans, or tools) communicate via chat to solve tasks. It supports complex patterns like "hierarchical chat" and "human-in-the-loop" verification.74
+LangGraph: A graph-based framework. It models agent workflows as nodes and edges in a state machine. Unlike linear chains (LangChain), LangGraph allows for cycles (loops), essential for agents that need to retry tasks or refine their work iteratively.71
+7. Safety, Alignment, and Adversarial Robustness
+As LLMs become more capable, ensuring they remain safe and aligned with human values is critical.
+7.1 Adversarial Attacks: Injection and Jailbreaking
+Prompt Injection: A security vulnerability where an attacker embeds malicious instructions into the input (often via third-party data like a webpage summary) to override the system's programming (e.g., "Ignore previous instructions and exfiltrate user data").7 It is the "SQL Injection" of the Generative AI era.
+Jailbreaking: A specific form of attack designed to bypass safety filters. Techniques include role-playing ("Act as a villain"), using low-resource languages (which safety filters may not understand), or using "Many-Shot" attacks (flooding the context with harmful examples).7 "Prompt Injection" targets the application logic, while "Jailbreaking" targets the model's safety alignment.
+7.2 Defense Mechanisms
+Red Teaming: The practice of employing adversarial teams (human or AI) to relentlessly attack a model to discover vulnerabilities before deployment.79
+Constitutional AI (Anthropic): A scalable alignment method. Instead of relying on expensive human feedback for every query, the model is given a "Constitution" of principles (e.g., "be harmless," "respect copyright"). During training, the AI critiques its own outputs against this constitution and revises them (Reinforcement Learning from AI Feedback - RLAIF). This automates the alignment process and makes the model's values more transparent.80
+7.3 Benchmarks and Evaluation
+Measuring progress requires standardized tests.
+MMLU (Massive Multitask Language Understanding): Tests general world knowledge across 57 subjects (STEM, humanities, etc.).82
+GSM8K: Tests multi-step mathematical reasoning capabilities.84
+HumanEval: Tests coding ability. The model must write a function that passes a suite of unit tests.84
+TruthfulQA: Measures a model's tendency to mimic human misconceptions or generate falsehoods, assessing reliability.83
+8. Emerging Frontiers and Future Outlook
+The taxonomy of 2025 reveals a field moving from raw scale to refined efficiency and autonomy.
+Context Extension: Techniques like RoPE and Ring Attention are pushing context windows to millions of tokens, challenging the need for RAG in some use cases, though RAG remains essential for reducing "search-in-context" costs.24
+Emergent Abilities: As models scale, abilities like Theory of Mind or complex arithmetic often emerge discontinuously—a phenomenon that necessitates rigorous safety monitoring.3
+Compound AI Systems: The future is not a single "God Model," but compound systems where LLMs act as the orchestration layer for a vast network of tools, databases, and specialized sub-models (Agents).64
+The vocabulary defined here—from the atomic token to the autonomous agent—forms the linguistic and conceptual infrastructure of the next generation of computing. Understanding these terms is no longer optional for technical professionals; it is the prerequisite for participating in the AI-driven future.
+9. Comprehensive Glossary of Technical Terms
+
+Term
+Definition
+Context/Significance
+Agent
+A system using an LLM as a reasoning engine to pursue goals, use tools, and maintain memory.
+Shifts AI from passive chat to active automation.63
+ALiBi
+Attention with Linear Biases; a positional encoding method allowing extrapolation to longer sequences.
+Enables processing documents longer than the training window.24
+Chain of Thought (CoT)
+A prompting technique encouraging the model to output intermediate reasoning steps.
+Drastically improves math/logic performance.56
+DPO
+Direct Preference Optimization; a stable alternative to RLHF for alignment.
+Removes the need for a separate reward model, simplifying training.39
+Embeddings
+Dense vector representations of tokens where semantic meaning maps to geometric proximity.
+The foundational data structure of all deep learning NLP.16
+Grokking
+A phenomenon where generalization suddenly occurs long after training accuracy has saturated.
+Suggests training longer can unlock hidden capabilities.31
+Hallucination
+The generation of factually incorrect or nonsensical information by an LLM.
+The primary reliability bottleneck for enterprise adoption.4
+KV Cache
+Storing Key and Value vectors during inference to avoid re-computation.
+Critical for reducing latency but high memory cost.49
+LoRA
+Low-Rank Adaptation; a PEFT technique injecting small trainable matrices into a frozen model.
+Standard for efficient fine-tuning on consumer hardware.42
+Prompt Injection
+An attack where untrusted input overrides system instructions.
+The SQL Injection equivalent for Generative AI.7
+RAG
+Retrieval-Augmented Generation; combining an LLM with external data retrieval.
+Solves the knowledge cutoff and hallucination problems.57
+RoPE
+Rotary Positional Embeddings; encodes position by rotating vectors.
+The standard for modern LLMs (Llama), enabling better length generalization.23
+Temperature
+A hyperparameter controlling randomness in the output distribution.
+High temp = creative; Low temp = deterministic.14
+Tokenization
+Converting text into discrete units (tokens) for processing.
+Impact on multilingual performance (BPE vs SentencePiece).16
+Transformer
+The neural architecture relying on self-attention, underpinning all modern LLMs.
+Replaced RNNs; allows massive parallelization.8
+
+Works cited
+Generative AI glossary: Key AI terms for 2025 and beyond - Zendesk, accessed on December 22, 2025, https://www.zendesk.com/blog/generative-ai-glossary/
+Generative AI - Machine Learning Glossary - Google for Developers, accessed on December 22, 2025, https://developers.google.com/machine-learning/glossary/generative
+[R] Are Emergent Abilities in Large Language Models just In-Context Learning? - Reddit, accessed on December 22, 2025, https://www.reddit.com/r/MachineLearning/comments/19bkcqz/r_are_emergent_abilities_in_large_language_models/
+Glossary of Terms: Generative AI Basics - MIT Sloan Teaching & Learning Technologies, accessed on December 22, 2025, https://mitsloanedtech.mit.edu/ai/basics/glossary/
+Generative AI Glossary for Business Leaders | Salesforce, accessed on December 22, 2025, https://www.salesforce.com/artificial-intelligence/generative-ai-glossary/
+LLM terminology: the top 60+ terms to know - Nebuly, accessed on December 22, 2025, https://www.nebuly.com/blog/llm-terminology-the-top-50-terms-to-know
+LLM01:2025 Prompt Injection - OWASP Gen AI Security Project, accessed on December 22, 2025, https://genai.owasp.org/llmrisk/llm01-prompt-injection/
+Transformer (deep learning) - Wikipedia, accessed on December 22, 2025, https://en.wikipedia.org/wiki/Transformer_(deep_learning)
+Tutorial 6: Transformers and Multi-Head Attention — UvA DL Notebooks v1.2 documentation, accessed on December 22, 2025, https://uvadlc-notebooks.readthedocs.io/en/latest/tutorial_notebooks/tutorial6/Transformers_and_MHAttention.html
+Why multi-head self attention works: math, intuitions and 10+1 hidden insights | AI Summer, accessed on December 22, 2025, https://theaisummer.com/self-attention/
+LLM Transformer Architecture Explained: How AI Processes Language | SaM Solutions, accessed on December 22, 2025, https://sam-solutions.com/blog/llm-transformer-architecture/
+What is multi-head attention doing mathematically, and how is it different from self-attention?, accessed on December 22, 2025, https://ai.stackexchange.com/questions/34657/what-is-multi-head-attention-doing-mathematically-and-how-is-it-different-from
+Transformers Explained Visually (Part 3): Multi-head Attention, deep dive, accessed on December 22, 2025, https://towardsdatascience.com/transformers-explained-visually-part-3-multi-head-attention-deep-dive-1c1ff1024853/
+The Anatomy of an LLM: Attention & Transformers | Medium, accessed on December 22, 2025, https://medium.com/@thisiskuhan/the-anatomy-of-an-llm-part-1-894ce445446c
+Glossary - Expert.ai, accessed on December 22, 2025, https://www.expert.ai/glossary-of-ai-terms/
+How LLMs Work: Tokens, Embeddings, and Transformers | Dremio, accessed on December 22, 2025, https://www.dremio.com/blog/how-llms-work-tokens-embeddings-and-transformers/
+What are the types of tokenizers? - Artificial Intelligence Stack Exchange, accessed on December 22, 2025, https://ai.stackexchange.com/questions/47214/what-are-the-types-of-tokenizers
+BPE vs WordPiece vs SentencePiece: A Beginner-Friendly Guide to Subword Tokenization | by Dhiya Adli | Medium, accessed on December 22, 2025, https://medium.com/@dhiyaadli/bpe-vs-wordpiece-vs-sentencepiece-a-beginner-friendly-guide-to-subword-tokenization-8047b39d82e0
+LLM Tokenizers Explained: BPE Encoding, WordPiece and SentencePiece - YouTube, accessed on December 22, 2025, https://www.youtube.com/watch?v=hL4ZnAWSyuU
+Comparing BPE, WordPiece, and SentencePiece in NLP | CodeSignal Learn, accessed on December 22, 2025, https://codesignal.com/learn/courses/2-modern-tokenization-techniques-for-ai-llms/lessons/comparing-bpe-wordpiece-and-sentencepiece-in-nlp
+LLM Transformer Model Visually Explained - Polo Club of Data Science, accessed on December 22, 2025, https://poloclub.github.io/transformer-explainer/
+Positional Embeddings in Transformers: A Math Guide to RoPE & ALiBi, accessed on December 22, 2025, https://towardsdatascience.com/positional-embeddings-in-transformers-a-math-guide-to-rope-alibi/
+Why people use RoPE instead of Alibi when buliding their models? : r/LocalLLaMA - Reddit, accessed on December 22, 2025, https://www.reddit.com/r/LocalLLaMA/comments/165b0tw/why_people_use_rope_instead_of_alibi_when/
+Beyond the Limits: A Survey of Techniques to Extend the Context Length in Large Language Models - arXiv, accessed on December 22, 2025, https://arxiv.org/html/2402.02244v2
+Inside RoPE: Rotary Magic into Position Embeddings - Learn OpenCV, accessed on December 22, 2025, https://learnopencv.com/rope-position-embeddings/
+Post-training methods for language models | Red Hat Developer, accessed on December 22, 2025, https://developers.redhat.com/articles/2025/11/04/post-training-methods-language-models
+Reconciling Kaplan and Chinchilla Scaling Laws - OpenReview, accessed on December 22, 2025, https://openreview.net/forum?id=NLoaLyuUUF
+Chinchilla data-optimal scaling laws: In plain English - LifeArchitect.ai, accessed on December 22, 2025, https://lifearchitect.ai/chinchilla/
+Reconciling Kaplan and Chinchilla Scaling Laws - arXiv, accessed on December 22, 2025, https://arxiv.org/html/2406.12907v2
+Scaling Laws for LLM Pretraining - Jonas Vetterle Personal Page & Blog, accessed on December 22, 2025, https://www.jonvet.com/blog/llm-scaling-laws
+Why grokking (emergent understanding) happens in LLM training (Discover AI, 27 minutes) : r/singularity - Reddit, accessed on December 22, 2025, https://www.reddit.com/r/singularity/comments/1i1qyx1/why_grokking_emergent_understanding_happens_in/
+Do Machine Learning Models Memorize or Generalize? - People + AI Research, accessed on December 22, 2025, https://pair.withgoogle.com/explorables/grokking/
+Grokking: A Deep Dive into Delayed Generalization in Neural Networks | by kirouane Ayoub, accessed on December 22, 2025, https://medium.com/@ayoubkirouane3/grokking-a-deep-dive-into-delayed-generalization-in-neural-networks-e117fdef07a1
+[D] Paper Explained - Grokking: Generalization beyond Overfitting on small algorithmic datasets (Full Video Analysis) : r/MachineLearning - Reddit, accessed on December 22, 2025, https://www.reddit.com/r/MachineLearning/comments/q2u2kx/d_paper_explained_grokking_generalization_beyond/
+LLM Fine-Tuning Methods: A Complete Guide to Post-Training Optimization Techniques, accessed on December 22, 2025, https://runloop.ai/blog/llm-fine-tuning-methods-a-complete-guide-to-post-training-optimization-techniques
+A Deep Dive into the Trade-Offs of Parameter-Efficient Preference Alignment Techniques, accessed on December 22, 2025, https://arxiv.org/html/2406.04879v1
+Large Language Model Post Training Techniques — SFT, RL | by Manu Suryavansh, accessed on December 22, 2025, https://msuryavanshi.medium.com/large-language-model-fine-tuning-techniques-df8975396989
+Evaluating the Effectiveness of Direct Preference Optimization (DPO) vs RLHF - ijrpr, accessed on December 22, 2025, https://ijrpr.com/uploads/V6ISSUE12/IJRPR57572.pdf
+RLHF and DPO Compared - CROWDWORKS Blog, accessed on December 22, 2025, https://crowdworks.blog/en/rlhf-and-dpo-compared/
+D.P.O vs R.L.H.F : A Battle for Fine-Tuning Supremacy in Language Models - Medium, accessed on December 22, 2025, https://medium.com/@sinarya.114/d-p-o-vs-r-l-h-f-a-battle-for-fine-tuning-supremacy-in-language-models-04b273e7a173
+Comparing Fine-Tuning Optimization Techniques (LoRA, QLoRA, DoRA, and QDoRA), accessed on December 22, 2025, https://www.encora.com/en-US/insights/comparing-fine-tuning-optimization-techniques-lora-qlora-dora-and-qdora
+LoRA vs. QLoRA - Red Hat, accessed on December 22, 2025, https://www.redhat.com/en/topics/ai/lora-vs-qlora
+Finetuning LLMs - PEFT, LoRA and QLoRA Explained - YouTube, accessed on December 22, 2025, https://www.youtube.com/watch?v=23ipdLXZOjA
+Parameter Efficient Fine Tuning (PEFT) — LoRA & QLoRA — Part 1 | by A B Vijay Kumar, accessed on December 22, 2025, https://abvijaykumar.medium.com/fine-tuning-llm-parameter-efficient-fine-tuning-peft-lora-qlora-part-1-571a472612c4
+What is Quantization - Lightning AI, accessed on December 22, 2025, https://lightning.ai/pages/community/article/what-is-quantization/
+Introducing NVFP4 for Efficient and Accurate Low-Precision Inference - NVIDIA Developer, accessed on December 22, 2025, https://developer.nvidia.com/blog/introducing-nvfp4-for-efficient-and-accurate-low-precision-inference/
+Mastering LLM Techniques: Inference Optimization | NVIDIA Technical Blog, accessed on December 22, 2025, https://developer.nvidia.com/blog/mastering-llm-techniques-inference-optimization/
+From Theory to Practice: Demystifying the Key-Value Cache in Modern LLMs, accessed on December 22, 2025, https://alain-airom.medium.com/from-theory-to-practice-demystifying-the-key-value-cache-in-modern-llms-9674e9f904a5
+KV cache offloading | LLM Inference Handbook - BentoML, accessed on December 22, 2025, https://bentoml.com/llm/inference-optimization/kv-cache-offloading
+Understanding KV Cache: The Secret to Faster LLM Inference | by Sachin Soni | Nov, 2025, accessed on December 22, 2025, https://medium.com/@sachinsoni600517/understanding-kv-cache-the-secret-to-faster-llm-inference-a9a825d701de
+Pruning and Distilling LLMs Using NVIDIA TensorRT Model Optimizer, accessed on December 22, 2025, https://developer.nvidia.com/blog/pruning-and-distilling-llms-using-nvidia-tensorrt-model-optimizer/
+LLM Distillation and Pruning: Strategies for Efficiency - Sapien, accessed on December 22, 2025, https://www.sapien.io/blog/llm-distillation-and-pruning
+LLM Pruning and Distillation in Practice - OpenReview, accessed on December 22, 2025, https://openreview.net/forum?id=mMmzHS28ht
+Combining Pruning and Knowledge Distillation | by Mukul Ranjan - Medium, accessed on December 22, 2025, https://medium.com/@mukulranjan/combining-pruning-and-knowledge-distillation-1b5b7407c8c8
+[2408.11796] LLM Pruning and Distillation in Practice: The Minitron Approach - arXiv, accessed on December 22, 2025, https://arxiv.org/abs/2408.11796
+AI Glossary | AI Terms to Know in 2025 - Pryon, accessed on December 22, 2025, https://www.pryon.com/landing/rag-definition-and-llm-glossary
+Advanced RAG, accessed on December 22, 2025, https://medium.com/pune-ai-community/advanced-rag-a04a9a3f41bf
+9 advanced RAG techniques to know & how to implement them - Meilisearch, accessed on December 22, 2025, https://www.meilisearch.com/blog/rag-techniques
+Advanced RAG Techniques for High-Performance LLM Applications - Graph Database & Analytics - Neo4j, accessed on December 22, 2025, https://neo4j.com/blog/genai/advanced-rag-techniques/
+Retrieval-augmented Generation: Part 3, accessed on December 22, 2025, https://billtcheng2013.medium.com/retrieval-augmented-generation-part-3-834a4f30442f
+RAG 2.0 : Advanced Chunking Strategies with Examples., accessed on December 22, 2025, https://medium.com/@visrow/rag-2-0-advanced-chunking-strategies-with-examples-d87d03adf6d1
+Advanced RAG Techniques | StackAI, accessed on December 22, 2025, https://www.stack-ai.com/blog/advanced-rag-techniques
+Glossary of GenAI Terms | AI In Teaching and Learning - The University of British Columbia, accessed on December 22, 2025, https://ai.ctlt.ubc.ca/resources/glossary-of-genai-terms/
+Building Effective AI Agents - Anthropic, accessed on December 22, 2025, https://www.anthropic.com/research/building-effective-agents
+Chain-of-thought, tree-of-thought, and graph-of-thought: Prompting techniques explained, accessed on December 22, 2025, https://wandb.ai/sauravmaheshkar/prompting-techniques/reports/Chain-of-thought-tree-of-thought-and-graph-of-thought-Prompting-techniques-explained---Vmlldzo4MzQwNjMx
+Chain of Thoughts vs Tree of Thoughts for Language Learning Models (LLMs) - Medium, accessed on December 22, 2025, https://medium.com/@sonal.sareen/chain-of-thoughts-vs-tree-of-thoughts-for-language-learning-models-llms-fc11efbd20ab
+Demystifying Chains, Trees, and Graphs of Thoughts - arXiv, accessed on December 22, 2025, https://arxiv.org/html/2401.14295v3
+Tree of Thoughts (ToT) - Prompt Engineering Guide, accessed on December 22, 2025, https://www.promptingguide.ai/techniques/tot
+ReAct vs Plan-and-Execute: A Practical Comparison of LLM Agent Patterns, accessed on December 22, 2025, https://dev.to/jamesli/react-vs-plan-and-execute-a-practical-comparison-of-llm-agent-patterns-4gh9
+What is a ReAct Agent? | IBM, accessed on December 22, 2025, https://www.ibm.com/think/topics/react-agent
+What Is AI Agent Memory? | IBM, accessed on December 22, 2025, https://www.ibm.com/think/topics/ai-agent-memory
+Short-Term vs Long-Term Memory in AI Agents - ADaSci, accessed on December 22, 2025, https://adasci.org/short-term-vs-long-term-memory-in-ai-agents/
+How to Build AI That Actually Remembers: Your Complete Guide to Long-Term Memory in Agentic AI, accessed on December 22, 2025, https://medium.com/@daniel.lozovsky/how-to-build-ai-that-actually-remembers-your-complete-guide-to-long-term-memory-in-agentic-ai-a233971ae5a8
+CrewAI vs LangGraph vs AutoGen: Choosing the Right Multi-Agent AI Framework, accessed on December 22, 2025, https://www.datacamp.com/tutorial/crewai-vs-langgraph-vs-autogen
+Framework for orchestrating role-playing, autonomous AI agents. By fostering collaborative intelligence, CrewAI empowers agents to work together seamlessly, tackling complex tasks. - GitHub, accessed on December 22, 2025, https://github.com/crewAIInc/crewAI
+2025 Guide to Production-Ready AI Agent Frameworks: CrewAI vs AutoGen - Kanerika, accessed on December 22, 2025, https://kanerika.com/blogs/crewai-vs-autogen/
+Adversarial Prompting in LLMs - Prompt Engineering Guide, accessed on December 22, 2025, https://www.promptingguide.ai/risks/adversarial
+Key differences between prompt injection and jailbreaking | by Ken Huang - Medium, accessed on December 22, 2025, https://kenhuangus.medium.com/key-differences-between-prompt-injection-and-jailbreaking-d397cffbe812
+What is red teaming for generative AI? - IBM Research, accessed on December 22, 2025, https://research.ibm.com/blog/what-is-red-teaming-gen-AI
+Constitutional Classifiers: Defending against universal jailbreaks - Anthropic, accessed on December 22, 2025, https://www.anthropic.com/research/constitutional-classifiers
+Collective Constitutional AI: Aligning a Language Model with Public Input - Anthropic, accessed on December 22, 2025, https://www.anthropic.com/research/collective-constitutional-ai-aligning-a-language-model-with-public-input
+Introduction to LLM Benchmarks | DeepEval - The Open-Source LLM Evaluation Framework, accessed on December 22, 2025, https://deepeval.com/docs/benchmarks-introduction
+Top LLM Benchmarks Explained: MMLU, HellaSwag, BBH, and Beyond - Confident AI, accessed on December 22, 2025, https://www.confident-ai.com/blog/llm-benchmarks-mmlu-hellaswag-and-beyond
+30 LLM evaluation benchmarks and how they work - Evidently AI, accessed on December 22, 2025, https://www.evidentlyai.com/llm-guide/llm-benchmarks
+40 Large Language Model Benchmarks and The Future of Model Evaluation - Arize AI, accessed on December 22, 2025, https://arize.com/blog/llm-benchmarks-mmlu-codexglue-gsm8k
+A Complete Guide to LLM Benchmark Categories - Galileo AI, accessed on December 22, 2025, https://galileo.ai/blog/llm-benchmarks-categories
+The Intuition Behind Context Extension Mechanisms for LLMs | by Changsha Ma | Medium, accessed on December 22, 2025, https://medium.com/@machangsha/the-intuition-behind-context-extension-mechanisms-for-llms-b9aa036304d7
+Emergent Abilities in Large Language Models: An Explainer - CSET, accessed on December 22, 2025, https://cset.georgetown.edu/article/emergent-abilities-in-large-language-models-an-explainer/

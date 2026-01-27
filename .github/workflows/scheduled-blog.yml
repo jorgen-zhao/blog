@@ -1,0 +1,88 @@
+name: Auto Blog Generator
+
+on:
+  schedule:
+    # Run every Monday and Thursday at 02:00 UTC
+    - cron: '0 2 * * 1,4'
+  workflow_dispatch:
+    inputs:
+      target_dir:
+        description: 'Specific directory to process (optional, overrides matrix if handled manually, but here we just run the matrix)'
+        required: false
+        type: string
+
+jobs:
+  generate-post:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target_dir: ["docs/android", "docs/security"]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: pip install -r scripts/requirements.txt
+
+      - name: Determine Target Directory
+        id: set_dir
+        run: |
+          if [ "${{ inputs.target_dir }}" != "" ]; then
+             echo "DIR=${{ inputs.target_dir }}" >> $GITHUB_ENV
+          else
+             echo "DIR=${{ matrix.target_dir }}" >> $GITHUB_ENV
+          fi
+
+      - name: Run Auto Blog Generator
+        id: generator
+        env:
+          ZHIPUAI_API_KEY: ${{ secrets.ZHIPUAI_API_KEY }}
+        run: python scripts/auto_blog_generator.py --dir ${{ env.DIR }}
+
+      - name: Create Branch
+        id: create_branch
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          
+          # Unique branch name
+          TIMESTAMP=$(date +%Y%m%d%H%M%S)
+          TOPIC=$(basename ${{ env.DIR }})
+          BRANCH_NAME="ai-auto-${TOPIC}-${TIMESTAMP}"
+          
+          git checkout -b $BRANCH_NAME
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+
+      - name: Commit and Push
+        run: |
+          # The generator script outputs the filepath to GITHUB_OUTPUT, 
+          # but we can also just add the directory provided.
+          git add ${{ env.DIR }}
+          
+          # Check if there are changes
+          if git diff --staged --quiet; then
+            echo "No changes to commit."
+            echo "HAS_CHANGES=false" >> $GITHUB_ENV
+          else
+            git commit -m "feat: auto-generated blog post for ${{ env.DIR }}"
+            git push origin ${{ env.BRANCH_NAME }}
+            echo "HAS_CHANGES=true" >> $GITHUB_ENV
+          fi
+
+      - name: Create Pull Request
+        if: env.HAS_CHANGES == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        run: |
+          gh pr create \
+            --title "🤖 Auto-Blog: Update for ${{ env.DIR }}" \
+            --body "Auto-generated content for topic: ${{ env.DIR }}. Please review." \
+            --base master \
+            --head ${{ env.BRANCH_NAME }}
