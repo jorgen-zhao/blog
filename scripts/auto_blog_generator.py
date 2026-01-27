@@ -46,181 +46,99 @@ def get_existing_files(target_dir):
         return []
     return [f for f in os.listdir(target_dir) if f.endswith(".md") and not f.startswith(".")]
 
-def pick_valid_directory(manual_dir=None):
+def pick_valid_directory(excluded_dirs=None, manual_dir=None):
     """
     Selects a directory to process.
     If manual_dir is provided, uses that.
-    Otherwise, iterates through TARGET_DIRS to find one with <= 30 files.
+    Otherwise, iterates through TARGET_DIRS to find one with <= 30 files,
+    ignoring any in excluded_dirs.
     """
     if manual_dir:
         candidates = [manual_dir]
     else:
-        # Shuffle to randomize selection order so we don't always check 'android' first
         candidates = list(TARGET_DIRS)
         random.shuffle(candidates)
     
-    for relative_path in candidates:
-        # Handle running from root or inside scripts (though usually run from root in CI)
-        # We assume script is run from repo root or we adjust path.
-        # In CI `runs-on`, we are at root.
+    # Filter out excluded
+    if excluded_dirs:
+        candidates = [d for d in candidates if d not in excluded_dirs]
         
-        # Check if actually exists
+    for relative_path in candidates:
         if not os.path.exists(relative_path):
-            print(f"Skipping {relative_path}: Directory not found.")
             continue
             
         files = get_existing_files(relative_path)
         count = len(files)
         
-        print(f"Checking {relative_path}: {count} files.")
-        
         if count > 30:
-            print(f"Skipping {relative_path}: Too many files (>30).")
+            print(f"Skipping {relative_path}: Too many files ({count} > 30).")
             continue
             
         return relative_path, files
         
     return None, None
 
-def analyze_and_generate(target_dir, valid_files):
-    client = ZhipuAiClient(api_key=API_KEY)
-    style_guide = get_style_guide()
-    
-    dir_name = os.path.basename(os.path.normpath(target_dir))
-    
-    # Check for stubs (files < 300 bytes)
-    stub_file = None
-    for f in valid_files:
-        path = os.path.join(target_dir, f)
-        if os.path.getsize(path) < 300:
-            stub_file = f
-            break
-            
-    if stub_file:
-        print(f"Found stub file to rewrite: {stub_file}")
-        with open(os.path.join(target_dir, stub_file), "r", encoding="utf-8") as f:
-            content = f.read()
-        
-        prompt = f"""
-        【角色设定】
-        {style_guide}
-        
-        【任务】
-        这是一个关于 "{dir_name}" 主题的目录下的一篇笔记或草稿。
-        请将其扩写成一篇完整的、深度的技术博客文章。
-        
-        【现有内容】
-        {content}
-        
-        【输出要求】
-        1. 保持原有文件名（这很重要，不要改名）。
-        2. 输出标准的 Markdown。
-        3. 包含 Front Matter。
-        """
-        
-        response = client.chat.completions.create(
-            model="glm-4.5-air",
-            messages=[{"role": "user", "content": prompt}],
-        )
-        return stub_file, response.choices[0].message.content
-        
-    else:
-        print(f"No stubs found. Identifying missing topic for: {dir_name}")
-        file_list_str = "\n".join(valid_files)
-        
-        planning_prompt = f"""
-        【背景】
-        我正在维护一个技术博客，目录是 "{dir_name}"。
-        
-        【现有文章列表】
-        {file_list_str}
-        
-        【任务】
-        1. 分析上述列表，找出该主题下缺失的一个重要子主题或概念。
-        2. 以该缺失主题写一篇新的技术博客。
-        
-        【输出要求】
-        1. 只输出 Markdown 内容。
-        2. 包含 Front Matter，title 必须明确。
-        """
-        
-        response = client.chat.completions.create(
-            model="glm-4.5-air",
-            messages=[
-                {"role": "system", "content": style_guide},
-                {"role": "user", "content": planning_prompt}
-            ],
-        )
-        content = response.choices[0].message.content
-        
-        # Determine filename
-        
-        # Calculate next index
-        max_prefix = 0
-        pattern = re.compile(r'^(\d+)\.')
-        for f in valid_files:
-            match = pattern.match(f)
-            if match:
-                prefix = int(match.group(1))
-                if prefix > max_prefix:
-                    max_prefix = prefix
-        
-        next_prefix = max_prefix + 10
-        if next_prefix == 10 and max_prefix == 0:
-             # Check if 00 exists
-             has_00 = any(f.startswith("00.") for f in valid_files)
-             if not has_00:
-                 # Logic: if directory is empty or has non-numbered files, start at 10 (or 00?)
-                 # User convention seems to be 00, 10, ...
-                 pass
-
-        # Extract title from content
-        title_match = re.search(r'title:\s*(.+)', content)
-        title_slug = "new-post"
-        if title_match:
-            title_clean = title_match.group(1).strip().strip('"').strip("'")
-            title_slug = re.sub(r'[^\w\u4e00-\u9fa5]+', '-', title_clean).strip('-')
-            
-        filename = f"{next_prefix:02d}.{title_slug}.md"
-        
-        return filename, content
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dir", help="Specific directory to process")
+    parser.add_argument("--count", type=int, default=5, help="Number of articles to generate")
     parser.add_argument("--dry-run", action="store_true", help="Do not write files")
     args = parser.parse_args()
     
-    # Select directory
-    target_dir, valid_files = pick_valid_directory(args.dir)
+    generated_files = []
+    processed_dirs = []
     
-    if not target_dir:
-        print("No valid directory found (all > 30 files or does not exist).")
-        # Exit gracefully, maybe 0 so flow doesn't fail?
-        sys.exit(0)
-        
-    print(f"Selected directory: {target_dir}")
+    # If specific dir is requested, we only do that one, ignoring count (or we could do multiple in one dir? 
+    # Logic usually implies 1 post per topic per timeframe to avoid spamming one folder. 
+    # So if manual dir is set, max 1 post.)
+    max_count = 1 if args.dir else args.count
     
-    if args.dry_run:
-        print("Dry run enabled. Exiting before API call.")
-        return
+    print(f"Plan: Generate up to {max_count} articles.")
 
-    try:
-        filename, content = analyze_and_generate(target_dir, valid_files)
+    for i in range(max_count):
+        print(f"\n--- Batch {i+1}/{max_count} ---")
+        target_dir, valid_files = pick_valid_directory(excluded_dirs=processed_dirs, manual_dir=args.dir)
         
-        output_path = os.path.join(target_dir, filename)
-        with open(output_path, "w", encoding="utf-8") as f:
-            f.write(content)
+        if not target_dir:
+            print("No more valid directories found.")
+            break
             
-        print(f"SUCCESS: Generated {output_path}")
+        print(f"Selected directory: {target_dir}")
+        processed_dirs.append(target_dir) # Mark as processed so we don't pick it again
+        
+        if args.dry_run:
+            print("Dry run enabled. Skipping generation.")
+            continue
+
+        try:
+            filename, content = analyze_and_generate(target_dir, valid_files)
+            
+            output_path = os.path.join(target_dir, filename)
+            with open(output_path, "w", encoding="utf-8") as f:
+                f.write(content)
+                
+            print(f"SUCCESS: Generated {output_path}")
+            generated_files.append(output_path)
+            
+        except Exception as e:
+            print(f"Error generating content for {target_dir}: {e}")
+            # Continue to next iteration even if one fails
+            continue
+
+    if generated_files:
         # Output for GitHub Actions
+        # We'll output the first one or a list. 
+        # Actually workflow can just git add docs/ so specific path passing is less critical for commit,
+        # but useful for PR body.
         if "GITHUB_OUTPUT" in os.environ:
              with open(os.environ["GITHUB_OUTPUT"], "a") as gh_out:
-                 gh_out.write(f"filepath={output_path}\n")
-                 
-    except Exception as e:
-        print(f"Error generating content: {e}")
-        sys.exit(1)
+                 gh_out.write(f"generated_count={len(generated_files)}\n")
+                 # Join with newline or space? GITHUB_OUTPUT is a KV file.
+                 # Let's just output a summary string
+                 summary = ", ".join([os.path.basename(f) for f in generated_files])
+                 gh_out.write(f"summary_filenames={summary}\n")
+    else:
+        print("No files generated.")
 
 if __name__ == "__main__":
     main()
