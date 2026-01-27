@@ -2,8 +2,7 @@ name: Auto Blog Generator
 
 on:
   schedule:
-    # Run every Monday and Thursday at 02:00 UTC
-    - cron: '0 2 * * 1,4'
+    - cron: '0 * * * *'
   workflow_dispatch:
     inputs:
       target_dir:
@@ -17,7 +16,24 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target_dir: ["docs/android", "docs/security"]
+        # list from `docs/android` to `docs/security` all directories here
+        target_dir: [
+          "docs/android",
+          "docs/big-data",
+          "docs/cloud",
+          "docs/code-world",
+          "docs/database",
+          "docs/devops",
+          "docs/distributed-system",
+          "docs/framework",
+          "docs/frontend",
+          "docs/message_queue",
+          "docs/operating_system",
+          "docs/programming_languages",
+          "docs/protocol",
+          "docs/security",
+          "docs/架构思想"
+        ]
     
     steps:
       - name: Checkout code
