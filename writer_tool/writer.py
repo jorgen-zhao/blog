@@ -3,7 +3,7 @@ import sys
 from zai import ZhipuAiClient
 
 # Configuration
-API_KEY = 'a301da8f75d1467ab3d3d375add58adb.n3SHY5s5W8yOzQAs'
+API_KEY = 'a301da8f75d1467ab3d3d375ad1d58adb.n3SHY5s5W18yOzQAs'
 STYLE_GUIDE_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".github", "STYLE_GUIDE.md")
 MODEL_NAME = "glm-4.5-air" # As requested by user
 
