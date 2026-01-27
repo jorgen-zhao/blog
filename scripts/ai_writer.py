@@ -48,7 +48,7 @@ def generate_article(style_guide, input_content):
     """
 
     response = client.chat.completions.create(
-        model="glm-4.7",
+        model="glm-4.5-air",
         messages=[{"role": "user", "content": prompt}],
     )
     return response.choices[0].message.content
