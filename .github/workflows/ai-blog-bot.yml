@@ -55,7 +55,8 @@ jobs:
             --title "🤖 AI Content: ${{ github.event.issue.title }}" \
             --body "Auto-generated from Issue #${{ github.event.issue.number }}. Please review content before merging." \
             --base master \
-            --head ${{ env.BRANCH_NAME }}
+            --head ${{ env.BRANCH_NAME }} \
+            --label "automerge"
             
       - name: Close Issue
         env:
