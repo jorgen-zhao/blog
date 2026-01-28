@@ -111,7 +111,12 @@ def analyze_and_generate(target_dir, valid_files):
         【输出要求】
         1. 保持原有文件名（这很重要，不要改名）。
         2. 输出标准的 Markdown。
-        3. 包含 Front Matter。
+        3. 必须包含 Front Matter (Jekyll/Hexo 格式)，如下：
+        ---
+        title: [根据内容自动生成的标题]
+        date: {datetime.date.today()}
+        tags: [自动提取2-3个标签]
+        ---
         """
         
         response = client.chat.completions.create(
@@ -137,7 +142,12 @@ def analyze_and_generate(target_dir, valid_files):
         
         【输出要求】
         1. 只输出 Markdown 内容。
-        2. 包含 Front Matter，title 必须明确。
+        2. 必须包含 Front Matter (Jekyll/Hexo 格式)，title 必须明确。，如下：
+        ---
+        title: [根据内容自动生成的标题]
+        date: {datetime.date.today()}
+        tags: [自动提取2-3个标签]
+        ---
         """
         
         response = client.chat.completions.create(
