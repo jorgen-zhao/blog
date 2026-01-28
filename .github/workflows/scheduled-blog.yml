@@ -89,4 +89,5 @@ jobs:
             --title "🤖 Auto-Blog: Batch Update (${{ steps.generator.outputs.generated_count }} posts)" \
             --body "Auto-generated content for: ${{ env.SUMMARY }}. Please review." \
             --base master \
-            --head ${{ env.BRANCH_NAME }}
+            --head ${{ env.BRANCH_NAME }} \
+            --label "automerge"
