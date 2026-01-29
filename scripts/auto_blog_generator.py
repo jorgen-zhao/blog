@@ -11,21 +11,8 @@ API_KEY = os.environ.get("ZHIPUAI_API_KEY")
 
 # Target directories as specified by user (corrected to match filesystem)
 TARGET_DIRS = [
-    "docs/android",
-    "docs/big_data",
-    "docs/cloud",
-    "docs/code-world",
-    "docs/database",
-    "docs/devops",
-    "docs/distributed_system",
-    "docs/framework",
-    "docs/frontend",
-    "docs/message_queue",
-    "docs/operating_system",
-    "docs/programming_languages",
-    "docs/protocol",
-    "docs/security",
-    "docs/架构思想"
+    "docs/LLM",
+    "docs/electronic_engineer",
 ]
 
 if not API_KEY:
