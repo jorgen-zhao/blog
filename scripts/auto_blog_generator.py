@@ -14,6 +14,23 @@ TARGET_DIRS = [
     "docs/ai_skill",
     "docs/ai_agent",
     "docs/ai_mcp",
+    "docs/LLM",
+    "docs/electronic_engineer",
+    "docs/android",
+    "docs/big_data",
+    "docs/cloud",
+    "docs/code-world",
+    "docs/database",
+    "docs/devops",
+    "docs/distributed_system",
+    "docs/framework",
+    "docs/frontend",
+    "docs/message_queue",
+    "docs/operating_system",
+    "docs/programming_languages",
+    "docs/protocol",
+    "docs/security",
+    "docs/架构思想"
 ]
 
 if not API_KEY:
@@ -38,7 +55,7 @@ def pick_valid_directory(excluded_dirs=None, manual_dir=None):
     """
     Selects a directory to process.
     If manual_dir is provided, uses that.
-    Otherwise, iterates through TARGET_DIRS to find one with <= 30 files,
+    Otherwise, iterates through TARGET_DIRS to find one with <= 60 files,
     ignoring any in excluded_dirs.
     """
     if manual_dir:
@@ -58,8 +75,8 @@ def pick_valid_directory(excluded_dirs=None, manual_dir=None):
         files = get_existing_files(relative_path)
         count = len(files)
         
-        if count > 30:
-            print(f"Skipping {relative_path}: Too many files ({count} > 30).")
+        if count > 60:
+            print(f"Skipping {relative_path}: Too many files ({count} > 60).")
             continue
             
         return relative_path, files
