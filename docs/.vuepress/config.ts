@@ -207,7 +207,34 @@ export default defineConfig4CustomTheme<VdoingThemeConfig>({
     // defaultMode: 'auto',
 
     // 侧边栏  'structuring' | { mode: 'structuring', collapsable: Boolean} | 'auto' | <自定义>    温馨提示：目录页数据依赖于结构化的侧边栏数据，如果你不设置为'structuring',将无法使用目录页
-    sidebar: false,
+    // 侧边栏  'structuring' | { mode: 'structuring', collapsable: Boolean} | 'auto' | <自定义>    温馨提示：目录页数据依赖于结构化的侧边栏数据，如果你不设置为'structuring',将无法使用目录页
+    // 侧边栏  'structuring' | { mode: 'structuring', collapsable: Boolean} | 'auto' | <自定义>    温馨提示：目录页数据依赖于结构化的侧边栏数据，如果你不设置为'structuring',将无法使用目录页
+    sidebar: {
+      mode: 'structuring',
+      collapsable: false,
+      minus: [
+        '/LLM/',
+        '/ai_agent/',
+        '/ai_mcp/',
+        '/ai_skill/',
+        '/android/',
+        '/big_data/',
+        '/cloud/',
+        '/code-world/',
+        '/database/',
+        '/devops/',
+        '/distributed_system/',
+        '/electronic_engineer/',
+        '/framework/',
+        '/frontend/',
+        '/message_queue/',
+        '/operating_system/',
+        '/programming_languages/',
+        '/protocol/',
+        '/security/',
+        '/架构思想/'
+      ]
+    },
 
     // 文章默认的作者信息，(可在md文件中单独配置此信息) string | {name: string, link?: string}
     author: {
