@@ -173,6 +173,9 @@ export default defineConfig4CustomTheme<VdoingThemeConfig>({
     // category: false, // 是否打开分类功能，默认true
     // tag: false, // 是否打开标签功能，默认true
     // archive: false, // 是否打开归档功能，默认true
+    category: false,
+    tag: false,
+    archive: false,
     // categoryText: '随笔', // 碎片化文章（_posts文件夹的文章）预设生成的分类值，默认'随笔'
 
     // pageStyle: 'line', // 页面风格，可选值：'card'卡片 | 'line' 线（未设置bodyBgImg时才生效）， 默认'card'。 说明：card时背景显示灰色衬托出卡片样式，line时背景显示纯色，并且部分模块带线条边框
@@ -204,7 +207,7 @@ export default defineConfig4CustomTheme<VdoingThemeConfig>({
     // defaultMode: 'auto',
 
     // 侧边栏  'structuring' | { mode: 'structuring', collapsable: Boolean} | 'auto' | <自定义>    温馨提示：目录页数据依赖于结构化的侧边栏数据，如果你不设置为'structuring',将无法使用目录页
-    sidebar: 'structuring',
+    sidebar: false,
 
     // 文章默认的作者信息，(可在md文件中单独配置此信息) string | {name: string, link?: string}
     author: {
